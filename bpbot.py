@@ -1,7 +1,7 @@
 import telebot
 from telebot import types
 
-token = "6927857136:AAFsHm4A-o1zLrKqL2QteMiBvaR0ET-jTnI"
+token = ""
 
 bot = telebot.TeleBot(token=token)
 
@@ -22,20 +22,10 @@ def contact(message):
     button11 = types.KeyboardButton("11-ый")
     markup.row(button11)
     bot.send_message(message.chat.id, "<b>Начнём</b>\n \nВыберите корпус, в котором вы учитесь🏫", parse_mode='html', reply_markup = markup)
-    bot.register_next_step_handler(message.chat.id, corpus)
+    bot.register_next_step_handler(message.chat.id, search)
 
-def corpus(message):
-    if message.text() == "11-ый":
-        markup = types.ReplyKeyboardMarkup()
-        buttonfio = types.KeyboardButton("По ФИО")
-        buttonsub = types.KeyboardButton("По Предмету📚")
-        markup.row(buttonfio)
-        markup.row(buttonsub)
-        bot.send_message(message.chat.id, "<b>Выберите тип поиска:</b>", parse_mode='html', reply_markup = markup)
-        bot.register_next_step_handler(int(message.chat.id), search)
-
-    def search(message):
-        if message.text() == "По Предмету📚":
+    def search(chat):
+        if chat.text() == "По Предмету📚":
             markup = types.ReplyKeyboardMarkup()
             b_rus_lit = types.KeyboardButton("Русский язык и Литература")
             b_mat = types.KeyboardButton("Математика")
@@ -51,6 +41,6 @@ def corpus(message):
             markup.row(b_obz_ist, b_geo_obj)
             b_cancel = types.KeyboardButton("Отмена↩️")
             markup.row(b_cancel)
-            bot.send_message(message.chat.id, "<b>Выберите предмет:</b>", parse_mode='html', reply_markup = markup)
+            bot.send_message(chat.id, "<b>Выберите предмет:</b>", parse_mode='html', reply_markup = markup)
 
 bot.polling(none_stop=True)
