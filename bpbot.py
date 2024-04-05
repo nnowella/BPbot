@@ -32,8 +32,6 @@ def search(message):
 def selection(message):
     if message.text == "По Предмету📚":
         subject(message)
-    if message.text == "Отмена↩️":
-        start(message)
 
 def subject(message):
     markup = types.ReplyKeyboardMarkup()
@@ -58,7 +56,7 @@ def subject(message):
 
 def selection2(message): 
     if message.text == "Отмена↩️":
-        start(message)
+        com_search(message)
     else:
         teacher(message)
 
@@ -104,7 +102,7 @@ def teacher(message):
 
 def selection3(message):
     if message.text == "Отмена↩️":
-        start(message)
+        subject(message)
     else:
         t_correlation(message)
 
@@ -147,7 +145,7 @@ def t_correlation(message):
 
 def cancelation(message):
     if message.text == "Отмена↩️":
-        start(message)
+        teacher(message)
     else:
         markup = types.ReplyKeyboardMarkup()
         bot.send_message(message.chat.id, "<b>ОШИБКА</b>", parse_mode='html', reply_markup = markup)
