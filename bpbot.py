@@ -5,29 +5,6 @@ token = ""
 
 bot = telebot.TeleBot(token=token)
 
-subjects = ['Русский язык и Литература',
-            'Математика','Информатика',
-            'Физика','Иностранный язык',
-            'Биология и Химия',
-            'Обществознание и История',
-            'География',
-            'ОБЖ']
-
-teachers = ['Сурадеева Ирина Геннадьевна',
-            'Юркевич Дмитрий Евгеньевич',
-            'Слуцкий Леонид Борисович',
-            'Коновалова Татьяна Александровна',
-            'Кондрухова Ольга Васильевна',
-            'Горошко Евгений Валерьевич',
-            'Горбунова Наталья Сергеевна',
-            'Перепелицын Сергей Анатольевич',
-            'Моргуненко Елена Юрьевна',
-            'Карпова Анна Сергеевна',
-            'Кирсанова Наталья Алексеевна',
-            'Баженов Олег Александрович',
-            'Стрижакова Виктория Леонидовна',
-            'Теряев Александр Иванович']
-
 @bot.message_handler(commands=['start'])
 def start(message):
     markup = types.ReplyKeyboardMarkup()
@@ -37,9 +14,8 @@ def start(message):
 
 def com_search(message):
     markup = types.ReplyKeyboardMarkup()
-    bp_initials = types.KeyboardButton("По ФИО👤")
     bp_subject = types.KeyboardButton("По Предмету📚")
-    markup.row(bp_initials, bp_subject)
+    markup.row(bp_subject)
     bp_cancel = types.KeyboardButton("Отмена↩️")
     markup.row(bp_cancel)
     bot.send_message(message.chat.id, "<b>Выберите тип поиска:</b>", parse_mode='html', reply_markup = markup)
@@ -78,25 +54,102 @@ def subject(message):
     s_cancel = types.KeyboardButton("Отмена↩️")
     markup.row(s_cancel)
     bot.send_message(message.chat.id, "<b>Выберите предмет:</b>", parse_mode='html', reply_markup = markup)
-    bot.register_next_step_handler(message, s_correlation)
+    bot.register_next_step_handler(message, selection2)
 
-def s_correlation(message):
-    body = message.text
-    for subject in subjects:
-        if body == subject:
-            teacher(message)
+def selection2(message): 
+    if message.text == "Отмена↩️":
+        start(message)
+    else:
+        teacher(message)
 
 def teacher(message):
     markup = types.ReplyKeyboardMarkup()
-    s_mat = types.KeyboardButton("Математика")
-    markup.row(s_mat)
+    body = message.text
+    if body == "Русский язык":
+        t_ruslit = types.KeyboardButton("Сурадеева Ирина Геннадьевна")
+        markup.row(t_ruslit)
+    if body == "Математика":
+        s_mat1 = types.KeyboardButton("Юркевич Дмитрий Евгеньевич")
+        s_mat2 = types.KeyboardButton("Слуцкий Леонид Борисович")
+        markup.row(s_mat1, s_mat2)
+    if body == "Информатика":
+        t_inf1 = types.KeyboardButton("Коновалова Татьяна Александровна")
+        t_inf2 = types.KeyboardButton("Кондрухова Ольга Васильевна")
+        t_inf3 = types.KeyboardButton("Горошко Евгений Валерьевич")
+        markup.row(t_inf1, t_inf2, t_inf3)
+    if body == "Физика":
+        s_fiz1 = types.KeyboardButton("Горбунова Наталья Сергеевна")
+        s_fiz2 = types.KeyboardButton("Перепелицын Сергей Анатольевич")
+        markup.row(s_fiz1, s_fiz2)
+    if body == "Иностранный язык":
+        s_forlan1 = types.KeyboardButton("Моргуненко Елена Юрьевна")
+        s_forlan2 = types.KeyboardButton("Карпова Анна Сергеевна")
+        markup.row(s_forlan1, s_forlan2)
+    if body == "Биология и Химия":
+        t_biochem = types.KeyboardButton("Кирсанова Наталья Алексеевна")
+        markup.row(t_biochem)
+    if body == "Обществознание и История":
+        t_sochis = types.KeyboardButton("Баженов Олег Александрович")
+        markup.row(t_sochis)
+    if body == "География":
+        t_geo = types.KeyboardButton("Стрижакова Виктория Леонидовна")
+        markup.row(t_geo)
+    if body == "ОБЖ":
+        t_obj = types.KeyboardButton("Теряев Александр Иванович")
+        markup.row(t_obj)
+    t_cancel = types.KeyboardButton("Отмена↩️")
+    markup.row(t_cancel)
     bot.send_message(message.chat.id, "<b>Выберите преподавателя:</b>", parse_mode='html', reply_markup = markup)
-    bot.register_next_step_handler(message, t_correlation)
+    bot.register_next_step_handler(message, selection3)
+
+def selection3(message):
+    if message.text == "Отмена↩️":
+        start(message)
+    else:
+        t_correlation(message)
 
 def t_correlation(message):
+    markup = types.ReplyKeyboardMarkup()
     body = message.text
-    for teacher in teachers:
-        if body == teacher:
-            a = 1
+    if body == "Сурадеева Ирина Геннадьевна":
+        bot.send_message(message.chat.id, "<b>Сурадеева Ирина Геннадьевна:</b>\nПочта: - \nТелеграмм: -", parse_mode='html', reply_markup = markup)
+    if body == "Юркевич Дмитрий Евгеньевич":
+        bot.send_message(message.chat.id, "<b>Юркевич Дмитрий Евгеньевич:</b>\nПочта: - \nТелеграмм: - ", parse_mode='html', reply_markup = markup)
+    if body == "Слуцкий Леонид Борисович":
+        bot.send_message(message.chat.id, "<b>Слуцкий Леонид Борисович:</b>\nПочта: - \nТелеграмм: - ", parse_mode='html', reply_markup = markup)
+    if body == "Коновалова Татьяна Александровна":
+        bot.send_message(message.chat.id, "<b>Коновалова Татьяна Александровна:</b>\nПочта: - \nТелеграмм: - ", parse_mode='html', reply_markup = markup)
+    if body == "Кондрухова Ольга Васильевна":
+        bot.send_message(message.chat.id, "<b>Кондрухова Ольга Васильевна:</b>\nПочта: - \nТелеграмм: - ", parse_mode='html', reply_markup = markup)
+    if body == "Горошко Евгений Валерьевич":
+        bot.send_message(message.chat.id, "<b>Горошко Евгений Валерьевич:</b>\nПочта: - \nТелеграмм: - ", parse_mode='html', reply_markup = markup)
+    if body == "Горбунова Наталья Сергеевна":
+        bot.send_message(message.chat.id, "<b>Горбунова Наталья Сергеевна:</b>\nПочта: - \nТелеграмм: - ", parse_mode='html', reply_markup = markup)
+    if body == "Перепелицын Сергей Анатольевич":
+        bot.send_message(message.chat.id, "<b>Перепелицын Сергей Анатольевич:</b>\nПочта: - \nТелеграмм: - ", parse_mode='html', reply_markup = markup)
+    if body == "Моргуненко Елена Юрьевна":
+        bot.send_message(message.chat.id, "<b>Моргуненко Елена Юрьевна:</b>\nПочта: - \nТелеграмм: - ", parse_mode='html', reply_markup = markup)
+    if body == "Карпова Анна Сергеевна":
+        bot.send_message(message.chat.id, "<b>Карпова Анна Сергеевна:</b>\nПочта: - \nТелеграмм: - ", parse_mode='html', reply_markup = markup)
+    if body == "Кирсанова Наталья Алексеевна":
+        bot.send_message(message.chat.id, "<b>Кирсанова Наталья Алексеевна:</b>\nПочта: - \nТелеграмм: - ", parse_mode='html', reply_markup = markup)
+    if body == "Баженов Олег Александрович":
+        bot.send_message(message.chat.id, "<b>Баженов Олег Александрович:</b>\nПочта: - \nТелеграмм: - ", parse_mode='html', reply_markup = markup)
+    if body == "Стрижакова Виктория Леонидовна":
+        bot.send_message(message.chat.id, "<b>Стрижакова Виктория Леонидовна:</b>\nПочта: - \nТелеграмм: - ", parse_mode='html', reply_markup = markup)
+    if body == "Теряев Александр Иванович":
+        bot.send_message(message.chat.id, "<b>Теряев Александр Иванович:</b>\nПочта: - \nТелеграмм: - ", parse_mode='html', reply_markup = markup)
+    if body == "Отмена↩️":
+        start(message)
+    c_cancel = types.KeyboardButton("Отмена↩️")
+    markup.row(c_cancel)
+    bot.register_next_step_handler(message, cancelation)
+
+def cancelation(message):
+    if message.text == "Отмена↩️":
+        start(message)
+    else:
+        markup = types.ReplyKeyboardMarkup()
+        bot.send_message(message.chat.id, "<b>ОШИБКА</b>", parse_mode='html', reply_markup = markup)
 
 bot.infinity_polling()
