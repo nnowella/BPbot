@@ -1,0 +1,86 @@
+import numpy as np
+from sklearn.cluster import DBSCAN
+from itertools import combinations
+
+def read_points(filename):
+    points = []
+    with open(filename, 'r') as file:
+        for line in file:
+            x, y = map(float, line.strip().split())
+            points.append((x, y))
+    return np.array(points)
+
+def cluster_points(points):
+    # Используем DBSCAN с eps=1.0 и min_samples=1 для выделения кластеров
+    clustering = DBSCAN(eps=1.0, min_samples=1).fit(points)
+    labels = clustering.labels_
+    n_clusters = len(set(labels)) - (1 if -1 in labels else 0)
+    
+    clusters = {}
+    for i, label in enumerate(labels):
+        if label not in clusters:
+            clusters[label] = []
+        clusters[label].append(points[i])
+    
+    # Отделяем аномалии (кластеры с <=10 точками, где все точки >1 от других кластеров)
+    valid_clusters = {}
+    anomalies = []
+    
+    for label in clusters:
+        if len(clusters[label]) > 10:
+            valid_clusters[label] = clusters[label]
+        else:
+            # Проверяем, что все точки кластера находятся >1 от точек других кластеров
+            is_anomaly = True
+            for other_label in clusters:
+                if other_label == label:
+                    continue
+                for point in clusters[label]:
+                    for other_point in clusters[other_label]:
+                        if np.linalg.norm(point - other_point) <= 1.0:
+                            is_anomaly = False
+                            break
+                    if not is_anomaly:
+                        break
+                if not is_anomaly:
+                    break
+            if is_anomaly:
+                anomalies.extend(clusters[label])
+            else:
+                valid_clusters[label] = clusters[label]
+    
+    return list(valid_clusters.values())
+
+def compute_distances(clusters):
+    min_dist = float('inf')
+    max_dist = 0.0
+    
+    # Перебираем все пары кластеров
+    for i, j in combinations(range(len(clusters)), 2):
+        cluster1 = clusters[i]
+        cluster2 = clusters[j]
+        
+        # Вычисляем все попарные расстояния между точками двух кластеров
+        for p1 in cluster1:
+            for p2 in cluster2:
+                dist = np.linalg.norm(p1 - p2)
+                if dist < min_dist:
+                    min_dist = dist
+                if dist > max_dist:
+                    max_dist = dist
+    
+    return min_dist, max_dist
+
+# Обработка файла A
+points_a = read_points('A.txt')
+clusters_a = cluster_points(points_a)
+min_a, max_a = compute_distances(clusters_a)
+
+# Обработка файла B
+points_b = read_points('Б.txt')
+clusters_b = cluster_points(points_b)
+min_b, max_b = compute_distances(clusters_b)
+
+# Вывод результатов
+print(int(min_a * 10000), int(max_a * 10000))
+print(int(min_b * 10000), int(max_b * 10000))
