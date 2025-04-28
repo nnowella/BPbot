@@ -1,0 +1,119 @@
+import math
+
+def read_points(filename):
+    """Чтение точек из файла."""
+    points = []
+    with open(filename, 'r') as f:
+        for line in f:
+            x, y = map(float, line.strip().split())
+            points.append((x, y))
+    return points
+
+def distance(a, b):
+    """Вычисление евклидова расстояния между двумя точками."""
+    return math.sqrt((a[0] - b[0])**2 + (a[1] - b[1])**2)
+
+def find_clusters(points, eps=1.0):
+    """Кластеризация точек методом DBSCAN (упрощённый вариант)."""
+    clusters = []
+    visited = set()
+    
+    for i, point in enumerate(points):
+        if i in visited:
+            continue
+        
+        visited.add(i)
+        neighbors = [j for j, p in enumerate(points) if distance(point, p) <= eps and j != i]
+        
+        if not neighbors:
+            continue  # Шумовая точка (не добавляем в кластер)
+        
+        # Начинаем новый кластер
+        cluster = [i]
+        queue = neighbors.copy()
+        
+        while queue:
+            current = queue.pop(0)
+            if current in visited:
+                continue
+            visited.add(current)
+            current_neighbors = [j for j, p in enumerate(points) if distance(points[current], p) <= eps and j != current]
+            
+            if len(current_neighbors) >= 1:  # Минимум 1 сосед (аналог min_samples=1)
+                queue.extend([n for n in current_neighbors if n not in queue and n not in visited])
+                if current not in cluster:
+                    cluster.append(current)
+        
+        clusters.append(cluster)
+    
+    return clusters
+
+def filter_anomalies(clusters, points, max_anomaly_size=10):
+    """Фильтрация аномалий (кластеры с <=10 точками, удалённые от других)."""
+    valid_clusters = []
+    anomalies = []
+    
+    for cluster in clusters:
+        if len(cluster) > max_anomaly_size:
+            valid_clusters.append(cluster)
+            continue
+        
+        is_anomaly = True
+        for other_cluster in clusters:
+            if other_cluster == cluster:
+                continue
+            
+            for p1_idx in cluster:
+                for p2_idx in other_cluster:
+                    if distance(points[p1_idx], points[p2_idx]) <= 1.0:
+                        is_anomaly = False
+                        break
+                if not is_anomaly:
+                    break
+            if not is_anomaly:
+                break
+        
+        if is_anomaly:
+            anomalies.extend(cluster)
+        else:
+            valid_clusters.append(cluster)
+    
+    # Преобразуем индексы в координаты
+    valid_clusters_points = []
+    for cluster in valid_clusters:
+        valid_clusters_points.append([points[i] for i in cluster])
+    
+    return valid_clusters_points
+
+def compute_min_max_distances(clusters):
+    """Вычисление минимального и максимального расстояний между кластерами."""
+    min_dist = float('inf')
+    max_dist = 0.0
+    
+    for i in range(len(clusters)):
+        for j in range(i + 1, len(clusters)):
+            for p1 in clusters[i]:
+                for p2 in clusters[j]:
+                    dist = distance(p1, p2)
+                    if dist < min_dist:
+                        min_dist = dist
+                    if dist > max_dist:
+                        max_dist = dist
+    
+    return min_dist, max_dist
+
+def process_file(filename):
+    """Обработка файла и вычисление расстояний."""
+    points = read_points(filename)
+    clusters_indices = find_clusters(points)
+    clusters_points = filter_anomalies(clusters_indices, points)
+    min_dist, max_dist = compute_min_max_distances(clusters_points)
+    return min_dist, max_dist
+
+# Обработка файлов
+min_a, max_a = process_file('A.txt')
+min_b, max_b = process_file('Б.txt')
+
+# Вывод результатов (целые части произведений на 10000)
+print(int(min_a * 10000), int(max_a * 10000))
+print(int(min_b * 10000), int(max_b * 10000))
